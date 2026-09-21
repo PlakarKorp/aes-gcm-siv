@@ -1,29 +1,58 @@
 name: CI
-on: ['pull_request']
+on:
+  push:
+    branches: ['main']
+  pull_request:
 
 jobs:
-  ci:
+  test:
     strategy:
       fail-fast: false
       matrix:
-        os: ['windows-latest', 'ubuntu-latest', 'macOS-latest']
-        go: ['1.17.x', '1.18.x']
+        # ubuntu and windows runners are amd64, macos runners are
+        # arm64, so the matrix exercises both assembly paths.
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        go: ['oldstable', 'stable']
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Go
-      uses: actions/setup-go@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go }}
-        check-latest: true
     - name: Build
       run: go build -v ./...
     - name: Test
-      run: go test -v -vet all ./...
-    - name: TestPureGo
-      run: go test -v -vet all -tags purego ./...
-    - uses: dominikh/staticcheck-action@v1.1.0
+      run: go test -vet all ./...
+    - name: Test purego
+      run: go test -vet all -tags purego ./...
+
+  staticcheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
       with:
-        version: '2022.1'
-        install-go: false
-        cache-key: ${{ matrix.go }}
+        go-version: 'stable'
+    - name: Install staticcheck
+      run: go install honnef.co/go/tools/cmd/staticcheck@latest
+    - name: staticcheck amd64
+      run: staticcheck ./...
+    - name: staticcheck arm64
+      env:
+        GOARCH: arm64
+      run: staticcheck ./...
+
+  regen-asm:
+    # le_ctr_amd64.s is generated; fail if it drifts from its
+    # generator. Needs an amd64 runner so avo sees the amd64 stubs.
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
+      with:
+        go-version: 'stable'
+    - name: Regenerate
+      working-directory: amd64-asm-gen
+      run: go generate ./...
+    - name: Diff
+      run: git diff --exit-code le_ctr_amd64.s

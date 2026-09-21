@@ -17,4 +17,6 @@ func aesctrAsm(nr int, enc *uint32, iv *[blockSize]byte, dst, src *byte, nblocks
 //
 // Commenting out or deleting this constant restricts aesctrAsm
 // to just one block a a time.
+//
+//lint:ignore U1000 consumed by ctr_arm64.s via go_asm.h
 const useMultiBlock = true
