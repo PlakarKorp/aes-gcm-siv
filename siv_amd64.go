@@ -4,7 +4,6 @@ package siv
 
 import (
 	"encoding/binary"
-	"unsafe"
 
 	"github.com/ericlagergren/polyval"
 	"github.com/ericlagergren/subtle"
@@ -167,8 +166,8 @@ func sum(tag *[TagSize]byte, authKey, nonce, plaintext, additionalData []byte) {
 func aesctr(nr int, enc *uint32, block *[TagSize]byte, dst, src []byte) {
 	for len(src) >= 8*blockSize {
 		leCtrBlocks8Asm(nr, enc,
-			(*[8 * blockSize]byte)(unsafe.Pointer(&dst[0])),
-			(*[8 * blockSize]byte)(unsafe.Pointer(&src[0])),
+			(*[8 * blockSize]byte)(dst),
+			(*[8 * blockSize]byte)(src),
 			block,
 		)
 		src = src[8*blockSize:]
@@ -177,8 +176,8 @@ func aesctr(nr int, enc *uint32, block *[TagSize]byte, dst, src []byte) {
 
 	if len(src) >= 4*blockSize {
 		leCtrBlocks4Asm(nr, enc,
-			(*[4 * blockSize]byte)(unsafe.Pointer(&dst[0])),
-			(*[4 * blockSize]byte)(unsafe.Pointer(&src[0])),
+			(*[4 * blockSize]byte)(dst),
+			(*[4 * blockSize]byte)(src),
 			block,
 		)
 		src = src[4*blockSize:]
@@ -187,8 +186,8 @@ func aesctr(nr int, enc *uint32, block *[TagSize]byte, dst, src []byte) {
 
 	if len(src) >= 2*blockSize {
 		leCtrBlocks2Asm(nr, enc,
-			(*[2 * blockSize]byte)(unsafe.Pointer(&dst[0])),
-			(*[2 * blockSize]byte)(unsafe.Pointer(&src[0])),
+			(*[2 * blockSize]byte)(dst),
+			(*[2 * blockSize]byte)(src),
 			block,
 		)
 		src = src[2*blockSize:]
@@ -197,8 +196,8 @@ func aesctr(nr int, enc *uint32, block *[TagSize]byte, dst, src []byte) {
 
 	if len(src) >= blockSize {
 		leCtrBlocks1Asm(nr, enc,
-			(*[blockSize]byte)(unsafe.Pointer(&dst[0])),
-			(*[blockSize]byte)(unsafe.Pointer(&src[0])),
+			(*[blockSize]byte)(dst),
+			(*[blockSize]byte)(src),
 			block,
 		)
 		src = src[blockSize:]
