@@ -1,6 +1,8 @@
 package siv
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"testing"
 )
 
@@ -73,6 +75,48 @@ func TestOpenPanics(t *testing.T) {
 			aead.Open(buf[:0], randbuf(NonceSize), buf[8:40], nil)
 		})
 	})
+}
+
+// 64 KiB benchmarks: the chunk size kloset encrypts backup data in.
+
+func newStdGCM(key []byte) (cipher.AEAD, error) {
+	b, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	return cipher.NewGCM(b)
+}
+
+func BenchmarkSeal64K_AES_GCM_SIV_128(b *testing.B) {
+	benchmarkSeal(b, NewGCM, 16, make([]byte, 64*1024))
+}
+
+func BenchmarkOpen64K_AES_GCM_SIV_128(b *testing.B) {
+	benchmarkOpen(b, NewGCM, 16, make([]byte, 64*1024))
+}
+
+func BenchmarkSeal64K_AES_GCM_SIV_256(b *testing.B) {
+	benchmarkSeal(b, NewGCM, 32, make([]byte, 64*1024))
+}
+
+func BenchmarkOpen64K_AES_GCM_SIV_256(b *testing.B) {
+	benchmarkOpen(b, NewGCM, 32, make([]byte, 64*1024))
+}
+
+func BenchmarkSeal64K_AES_GCM_128(b *testing.B) {
+	benchmarkSeal(b, newStdGCM, 16, make([]byte, 64*1024))
+}
+
+func BenchmarkOpen64K_AES_GCM_128(b *testing.B) {
+	benchmarkOpen(b, newStdGCM, 16, make([]byte, 64*1024))
+}
+
+func BenchmarkSeal64K_AES_GCM_256(b *testing.B) {
+	benchmarkSeal(b, newStdGCM, 32, make([]byte, 64*1024))
+}
+
+func BenchmarkOpen64K_AES_GCM_256(b *testing.B) {
+	benchmarkOpen(b, newStdGCM, 32, make([]byte, 64*1024))
 }
 
 // TestOpenRejects checks Open's error (non-panic) input checks.
