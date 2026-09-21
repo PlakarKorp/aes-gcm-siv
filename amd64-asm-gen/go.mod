@@ -3,7 +3,7 @@ module amd64-asm-gen
 go 1.25.1
 
 require (
-	github.com/ericlagergren/siv v0.0.0-00010101000000-000000000000
+	github.com/PlakarKorp/aes-gcm-siv v0.0.0-00010101000000-000000000000
 	github.com/mmcloughlin/avo v0.6.0
 )
 
@@ -16,4 +16,4 @@ require (
 	golang.org/x/tools v0.38.0 // indirect
 )
 
-replace github.com/ericlagergren/siv => ./..
+replace github.com/PlakarKorp/aes-gcm-siv => ./..

@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"sync"
 
-	_ "github.com/ericlagergren/siv"
+	_ "github.com/PlakarKorp/aes-gcm-siv"
 	. "github.com/mmcloughlin/avo/build"
 	. "github.com/mmcloughlin/avo/operand"
 	. "github.com/mmcloughlin/avo/reg"

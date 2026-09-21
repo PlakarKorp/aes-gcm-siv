@@ -1,4 +1,4 @@
-module github.com/ericlagergren/siv
+module github.com/PlakarKorp/aes-gcm-siv
 
 go 1.17
 
